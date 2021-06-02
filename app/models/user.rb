@@ -20,6 +20,10 @@ class User < ApplicationRecord
 
   validates :name, presence: true, length: {maximum: 20, minimum: 2}, uniqueness: true
   validates :introduction, length: {maximum: 50}
+  validates :postcode, format: { with: /\d{7}/ }, presence: true
+  validates :prefecture_code, presence: true
+  validates :address_city, presence: true
+  validates :address_street, presence: true
 
   # ユーザーをフォローするメソッド
   def follow(other_user)
@@ -49,6 +53,17 @@ class User < ApplicationRecord
     else
       @user = User.all
     end
+  end
+
+  include JpPrefecture
+  jp_prefecture :prefecture_code
+
+  def prefecture_name
+    JpPrefecture::Prefecture.find(code: prefecture_code).try(:name)
+  end
+
+  def prefecture_name=(prefecture_name)
+    self.prefecture_code = JpPrefecture::Prefecture.find(name: prefecture_name).code
   end
 
 end
